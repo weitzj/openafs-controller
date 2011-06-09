@@ -1,0 +1,2 @@
+#!/bin/sh
+~/make_alias /afs/.cellname/usr/username ~/Desktop

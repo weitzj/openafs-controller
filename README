@@ -1,0 +1,156 @@
+############################
+README for OpenAFSController   
+############################
+weitz.jan@googlemail.com
+
+This OpenAFSController Tool is Freeware.
+
+
+Built with Xcode 2.4.1 as Universal Binary.
+It was only tested on Powerbook G4 with Tiger (10.4) and MacBookPro with 
+Tiger (10.4).
+The 'klog' Option and 'Start-All' Option might only work on Tiger (10.4).
+It might work on older Versions but the Password dialog during 'klog' will 
+revail your password in plain text instead of bullets.
+
+
+The aim of this tool was to have a simple GUI to authenticate against
+the AFS 'kaserver' where the user can invoke the OpenAFS client command line 
+tools by just clicking buttons and combine the START- and STOP event with
+her/his own shellscripts.
+
+
+While begin unplugged from the network and still having the 
+OpenAFS client opened, I noticed a long delay until I could work again. So I
+thought a little tool to temporarily stop the OpenAFS client might help.
+
+Another problem was that symbolic links or aliases, I created, which pointed 
+into the /afs filesystem also made my laptop hang up if the OpenAFS client was
+already shut down.
+
+So I thought that it might be a good idea to create these
+symbolic links/aliases only after the OpenAFS client is turned on and 
+destroy them before the client is shut down.
+So this tool won't run a script unless the OpenAFS client is running 
+and the user has a token.
+
+	
+--- The functions ---
+
+Its functions are pretty limited. With the buttons you can 
+START and STOP the AFS Client, 
+get a new token or destroy it,
+and run your own scripts from your homefolder.
+
+To make sure the tool works, you have to have the OpenAFSClient installed, and
+to make sure that the files
+
+/Library/StartupItems/OpenAFS/OpenAFS
+/usr/bin/klog
+/usr/bin/unlog
+
+exist and that you have properly configured your CellServDB and ThisCell File.
+Right now it can just use 'klog' for the cell configured in ThisCell.
+Maybe in the future I will create an xml file or somthing like that where you 
+might run cell-dependend Start and Stop scripts.
+
+--- The START/STOP Buttons ---
+
+These buttons just invoke the command
+
+	/Library/StartupItems/OpenAFS/OpenAFS start || stop
+	
+which has to be done with administrator priviledges.
+
+--- The klog/unlog Buttons ---
+
+These buttons invoke just the shell commands 'klog' and 'unlog'
+
+--- The Post-Start and Pre-Stop Buttons ---
+
+After Starting the OpenAFS client and having a ticket it would be nice to have
+a symbolic link or alias of some /afs directory on your Deskop or some other
+place, so that you do not have to click through all folders.
+And also it would be nice to remove these links before you shut down the client. 
+
+Because everbody wants to invoke different events during Starup or Stop,
+it is all left to the users, by putting their Startup or Stop Options into 
+2 shell scripts in their HOME-Directory.
+
+~/ControllerPostStart  for events after OpenAFSClient started 
+						and a token was gained 
+~/ControllerPreStop	for events before tokens are 
+						destroyed and the OpenAFSclient is shut down
+
+Make sure that these files are marked executable
+
+	chmod +x filename
+	
+Please be aware that if you have created symbolic links and want to remove them
+you actually might delete the contents in the /afs directory. It won't be any 
+problem if the OpenAFSClient is shutdown before the script is started. But some
+reasons it might be important to leave the client still running.
+
+A safer way having the same effect of symbolic links is to create aliases.
+Aliases can safely be deleted before the OpenAFSClient is shut down.
+
+In the "example" folder you will find a 'make_aliases' script which will create
+these aliases and a ControllerPostStart and ControllerPreStop script, which will
+use this script.
+Also make sure these scripts are executable.
+
+--- The Start-All and Stop-All Buttons ---
+
+Start-All:
+	Check if OpenAFS Client is already running
+	Yes ->
+		Check if user already has a token
+		Yes ->
+			Check if user has a ControllerPostStart script
+			Yes ->
+				execute script
+			No ->
+				display message
+		No ->
+			Ask for AFS username -and password
+			Check if user has now a token
+			Yes ->
+				Check if user has a ControllerPostStart script
+				Yes ->
+					execute script
+				No ->
+					display message
+			No ->
+				display message
+	No ->
+		Start Client
+		Check if client is running
+		
+		Check token, check script, etc...
+		
+Stop-All:
+	Check if user has a ControllerPreStop script
+	Yes ->
+		execute script
+		
+		Check if OpenAfs client is running
+		Yes ->
+			stop the client
+		No -> display message
+	No-> display message
+		
+			
+
+
+
+
+
+Hopefully this tool might help you and I could get some feedback what I can do
+better. Feel free to email me  (jan dot weitz at uni-koeln dot de)
+	
+
+	
+	
+
+
+
